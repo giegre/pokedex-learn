@@ -4,14 +4,14 @@ import { ListGroup, ListGroupItem, Col } from 'react-bootstrap/lib/';
 const PokeList = ({ListOfPokemon}) => {
 
   let pokemon = ListOfPokemon.map((creature) => {
-    return(
+    return (
       <Col sm={6} md={4} key={creature.name}>
         <ListGroupItem className='Pokelist-item'>{creature.name}</ListGroupItem>
       </Col>
     )
   });
 
-  return(
+  return (
     <ListGroup>
       {pokemon}
     </ListGroup>

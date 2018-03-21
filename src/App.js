@@ -27,7 +27,7 @@ class App extends Component {
       .then(response => {
         return response.json();
       }).then(json => {
-        let pages = Math.round(json.count / this.state.limit);
+        let pages = Math.ceil(json.count / this.state.limit);
         this.setState({
           pokemon: json.results,
           totalPages: pages,
@@ -40,11 +40,16 @@ class App extends Component {
   }
 
   componentWillMount() {
-    this.loadPokemon(`${this.props.baseUrl}/pokemon/`);
+    this.loadPokemon(`${this.props.baseUrl}/pokemon/?limit=${this.state.limit}&offset=${this.state.offset}`);
   }
 
-  handlePaginationSelect() {
-    console.log(render.page);
+  handlePaginationSelect(number) {
+    console.log(number);
+    let offset = this.state.limit * (number - 1);
+    this.loadPokemon(`${this.props.baseUrl}/pokemon/?limit=${this.state.limit}&offset=${offset}`);
+    this.setState({
+      activePage : number
+    });
   }
 
   render() {
@@ -56,7 +61,7 @@ class App extends Component {
         <Pagination.Item
           key={number}
           active={number === active}
-          onClick={this.handlePaginationSelect}
+          onClick={()=> this.handlePaginationSelect(number)}
         >
         {number}
         </Pagination.Item>
