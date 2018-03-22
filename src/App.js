@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import 'whatwg-fetch';
-import PokeList from './components/PokeList';
-import { Col } from 'react-bootstrap/lib/';
-import Pagination from 'react-bootstrap/lib/Pagination';
+import PokemonIndexList from './components/PokemonIndexList';
+import PokemonModal from './components/PokemonModal';
 
 class App extends Component {
   constructor(props) {
@@ -15,11 +14,17 @@ class App extends Component {
       activePage: 1,
       limit: 50,
       offset: 0,
-      totalPages: 0
+      totalPages: 0,
+      count: 0,
+      loaded: false,
+      showModal: false
     };
 
     this.loadPokemon = this.loadPokemon.bind(this);
     this.handlePaginationSelect = this.handlePaginationSelect.bind(this);
+    this.handleLimitChange = this.handleLimitChange.bind(this);
+    this.handleModalOpen = this.handleModalOpen.bind(this);
+    this.handleModalClose = this.handleModalClose.bind(this);
   }
 
   loadPokemon(url) {
@@ -31,7 +36,8 @@ class App extends Component {
         this.setState({
           pokemon: json.results,
           totalPages: pages,
-          count: json.count
+          count: json.count,
+          loaded: true
         });
         console.log(this.state);
       }).catch(err => {
@@ -43,47 +49,65 @@ class App extends Component {
     this.loadPokemon(`${this.props.baseUrl}/pokemon/?limit=${this.state.limit}&offset=${this.state.offset}`);
   }
 
-  handlePaginationSelect(number) {
-    console.log(number);
-    let offset = this.state.limit * (number - 1);
+  handlePaginationSelect(event) {
+    let pageNumber = event.target.getAttribute("data-number");
+    let offset = this.state.limit * (pageNumber - 1);
     this.loadPokemon(`${this.props.baseUrl}/pokemon/?limit=${this.state.limit}&offset=${offset}`);
     this.setState({
-      activePage : number
+      activePage : +pageNumber
+    });
+    console.log(this.state.activePage);
+  }
+
+  handleLimitChange(event) {
+    console.log(event.target.getAttribute("data-number"));
+    this.setState({
+      limit: +event.target.getAttribute("data-number") || this.state.count,
+      activePage: 1
+    }, () => {
+      this.loadPokemon(`${this.props.baseUrl}/pokemon/?limit=${this.state.limit}&offset=0`);
+    })
+  }
+
+  handleModalOpen() {
+    this.setState({
+      showModal: true
+    });
+  }
+
+  handleModalClose() {
+    this.setState({
+      showModal: false
     });
   }
 
   render() {
 
-    let active = this.state.activePage;
-    let items = [];
-    for(let number = 1; number <= this.state.totalPages; number++){
-      items.push(
-        <Pagination.Item
-          key={number}
-          active={number === active}
-          onClick={()=> this.handlePaginationSelect(number)}
-        >
-        {number}
-        </Pagination.Item>
-      );
-    }
-
     return (
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
+          <h1 className="App-title">Welcome to the Pokedex</h1>
         </header>
 
-        <Col sm={8} md={10} smOffset={2} mdOffset={1} >
-          <PokeList ListOfPokemon={this.state.pokemon} />
-        </Col>
+        {this.state.loaded ? null : 'Now Loading ...'}
 
-        <Col sm={12} >
-          <Pagination bsSize="medium">
-            {items}
-          </Pagination>
-        </Col>
+        <PokemonIndexList
+          display={this.state.loaded}
+          options={[10, 50, 100, 200]}
+          selectedValue={this.state.limit}
+          allValue={this.state.count}
+          onOptionSelected={this.handleLimitChange}
+          ListOfPokemon={this.state.pokemon}
+          btnSize="medium"
+          totalPages={this.state.totalPages}
+          activePage={this.state.activePage}
+          onSelect={this.handlePaginationSelect} />
+
+        <PokemonModal
+          openModal={this.handleModalOpen}
+          closeModal={this.handleModalClose}
+          showModal={this.state.showModal} />
       </div>
     );
   }
