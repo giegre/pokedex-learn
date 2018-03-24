@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "ajv": "^6.0.0",
+    "chart.js": "^1.1.1",
     "react": "^16.2.0",
     "react-bootstrap": "^0.32.1",
+    "react-chartjs": "^1.2.0",
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.1",
     "react-ultimate-pagination": "^1.2.0"
